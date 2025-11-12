@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, UtensilsCrossed } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { ShoppingCart } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
 
 const navLinks = [
   { href: '/outlets', label: 'Outlets' },
@@ -36,6 +37,7 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end gap-4">
+           <ThemeToggle />
           <Button asChild variant="ghost" size="icon">
               <Link href="/cart">
                   <ShoppingCart className="h-5 w-5"/>
