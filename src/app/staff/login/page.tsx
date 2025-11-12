@@ -14,7 +14,8 @@ export default function StaffLoginPage() {
           <CardTitle className="font-headline text-3xl">Staff Login</CardTitle>
           <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
+          <form className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="employeeId">Employee ID</Label>
                <div className="relative">
@@ -35,6 +36,7 @@ export default function StaffLoginPage() {
             <Button asChild className="w-full">
                 <Link href={`/staff/dashboard/${outlets[0].id}`}>Login</Link>
             </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
