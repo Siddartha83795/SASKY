@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const clientSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().regex(/^\+91[6-9]\d{9}$/, { message: "Phone number must be in the format +91XXXXXXXXXX." }),
+  phone: z.string().regex(/^\+91\d{10}$/, { message: "Phone number must be in the format +91XXXXXXXXXX and have 10 digits." }),
 });
 type ClientFormValues = z.infer<typeof clientSchema>;
 
@@ -35,6 +35,7 @@ export default function LoginPage() {
 
     const clientForm = useForm<ClientFormValues>({
         resolver: zodResolver(clientSchema),
+        mode: 'onTouched',
         defaultValues: {
             email: '',
             phone: '',
@@ -124,7 +125,7 @@ export default function LoginPage() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={!clientForm.formState.isValid}>
                     Login as Client
                   </Button>
                 </form>
