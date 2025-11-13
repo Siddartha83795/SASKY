@@ -49,7 +49,7 @@ export default function Home() {
           </p>
           <div className="mt-8">
             <Button asChild size="lg" className="font-bold">
-              <Link href="/role-select">
+              <Link href="/auth/login">
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>

@@ -60,7 +60,7 @@ export default function Header() {
               </Link>
             </Button>
           ) : (
-            <Button asChild variant="ghost" className='hidden md:inline-flex'>
+            <Button asChild variant="default" className='hidden md:inline-flex'>
               <Link href="/auth/login">
                 Login
               </Link>
@@ -83,7 +83,7 @@ export default function Header() {
                   <UtensilsCrossed className="h-6 w-6 text-primary" />
                   <span className="font-headline">DineHub</span>
                 </Link>
-                {[...navLinks, { href: '/auth/login', label: 'Login' }].map((link) => (
+                {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -92,6 +92,12 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
+                 <Link
+                    href={'/auth/login'}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Login
+                  </Link>
               </nav>
             </SheetContent>
           </Sheet>
