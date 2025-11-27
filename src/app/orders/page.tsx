@@ -19,7 +19,8 @@ export default function OrdersPage() {
     if (!firestore || !authUser) return null;
     return query(
         collection(firestore, 'orders'),
-        where('client.id', '==', authUser.uid)
+        where('client.id', '==', authUser.uid),
+        orderBy('createdAt', 'desc')
     );
   }, [firestore, authUser]);
 
@@ -27,11 +28,12 @@ export default function OrdersPage() {
 
   const sortedOrders = useMemo(() => {
     if (!clientOrders) return [];
-    return [...clientOrders].sort((a, b) => {
-        const timeA = (a.createdAt as Timestamp)?.toDate?.() || new Date(0);
-        const timeB = (b.createdAt as Timestamp)?.toDate?.() || new Date(0);
-        return timeB.getTime() - timeA.getTime();
-    });
+    // The data is already sorted by the Firestore query.
+    // We just need to handle the Timestamp to Date conversion if it hasn't happened.
+    return clientOrders.map(o => ({
+      ...o,
+      createdAt: (o.createdAt as Timestamp)?.toDate ? (o.createdAt as Timestamp).toDate() : new Date(o.createdAt as string),
+    })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }, [clientOrders]);
 
   const activeOrders = useMemo(() => sortedOrders?.filter(o => ['pending', 'accepted', 'preparing', 'ready'].includes(o.status)) || [], [sortedOrders]);

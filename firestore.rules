@@ -28,7 +28,9 @@ service cloud.firestore {
      * by reading the role from their custom claims.
      */
     function isStaff() {
-      return isSignedIn() && request.auth.token.role == 'staff';
+      // In a real app, you would get this from custom claims.
+      // For this demo, we'll check a field in their user profile.
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
     }
 
     /**
@@ -111,7 +113,7 @@ service cloud.firestore {
      * @path /counters/{outletId}
      */
      match /counters/{outletId} {
-        allow get, update: if isSignedIn();
+        allow get, update, create, delete: if isSignedIn();
      }
   }
 }
