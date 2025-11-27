@@ -9,6 +9,7 @@ import { useFirebase, useUser, useCollection, useMemoFirebase } from '@/firebase
 import type { Order } from '@/lib/types';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 
 export default function OrdersPage() {
   const { firestore } = useFirebase();
