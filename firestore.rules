@@ -28,7 +28,9 @@ service cloud.firestore {
      * by reading the role from their user profile document.
      */
     function isStaff() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
+      // Check for the existence of the user document before accessing its data.
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
     }
     
     /**
@@ -102,7 +104,7 @@ service cloud.firestore {
       // Their queries must be filtered, which then relies on the 'read' rule above.
       allow list: if isStaff();
 
-      // Only staff can update order status.
+      // Only staff can update order status. Clients can cancel their own 'pending' orders.
       allow update: if isStaff(); 
       
       // No one can delete orders for now.
