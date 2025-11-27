@@ -21,7 +21,7 @@
     {
       "id": "item-chole-bhature",
       "description": "A plate of Chole Bhature.",
-      "imageUrl": "https://images.unsplash.com/photo-1672561924208-7762120e7077?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaG9sZSUyMGJoYXR1cmV8ZW58MHx8fHwxNzYyODQxMDg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaG9sZSUyMGJoYXR1cmV8ZW58MHx8fHwxNzYzMjcwMzMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "chole bhature"
     },
     {
@@ -51,7 +51,7 @@
     {
       "id": "item-filter-coffee",
       "description": "A cup of south indian filter coffee.",
-      "imageUrl": "https://images.unsplash.com/photo-1699179584541-ce1170753afe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmaWx0ZXIlMjBjb2ZmZWV8ZW58MHx8fHwxNzYyODQxMDg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1699179584541-ce1170f753afe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmaWx0ZXIlMjBjb2ZmZWV8ZW58MHx8fHwxNzYyODQxMDg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "filter coffee"
     },
     {
