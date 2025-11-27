@@ -19,15 +19,23 @@ export default function OrdersPage() {
     if (!firestore || !authUser) return null;
     return query(
         collection(firestore, 'orders'),
-        where('client.id', '==', authUser.uid),
-        orderBy('createdAt', 'desc')
+        where('client.id', '==', authUser.uid)
     );
   }, [firestore, authUser]);
 
   const { data: clientOrders, isLoading: areOrdersLoading } = useCollection<Order>(ordersQuery);
 
-  const activeOrders = useMemo(() => clientOrders?.filter(o => ['pending', 'accepted', 'preparing', 'ready'].includes(o.status)) || [], [clientOrders]);
-  const pastOrders = useMemo(() => clientOrders?.filter(o => ['completed', 'cancelled'].includes(o.status)) || [], [clientOrders]);
+  const sortedOrders = useMemo(() => {
+    if (!clientOrders) return [];
+    return [...clientOrders].sort((a, b) => {
+        const timeA = (a.createdAt as any)?.toDate?.() || new Date(a.createdAt as string);
+        const timeB = (b.createdAt as any)?.toDate?.() || new Date(b.createdAt as string);
+        return timeB.getTime() - timeA.getTime();
+    });
+  }, [clientOrders]);
+
+  const activeOrders = useMemo(() => sortedOrders?.filter(o => ['pending', 'accepted', 'preparing', 'ready'].includes(o.status)) || [], [sortedOrders]);
+  const pastOrders = useMemo(() => sortedOrders?.filter(o => ['completed', 'cancelled'].includes(o.status)) || [], [sortedOrders]);
 
   const renderSkeletons = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
