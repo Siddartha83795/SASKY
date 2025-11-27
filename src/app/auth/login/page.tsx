@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Mail, KeyRound } from 'lucide-react';
 import Link from 'next/link';
-import { mockUserProfile, mockStaffProfile } from '@/lib/data';
+import { mockUserProfile, mockStaffProfile, mockAnmolProfile } from '@/lib/data';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -54,6 +54,15 @@ export default function LoginPage() {
                 toast({
                     title: "Staff Login Successful",
                     description: `Welcome, ${mockStaffProfile.fullName}!`,
+                });
+                router.push('/outlets');
+            } else if (data.email === mockAnmolProfile.email && data.password === "password123") {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userRole', 'client');
+                localStorage.setItem('username', mockAnmolProfile.fullName);
+                toast({
+                    title: "Login Successful",
+                    description: `Welcome back, ${mockAnmolProfile.fullName}!`,
                 });
                 router.push('/outlets');
             } else {

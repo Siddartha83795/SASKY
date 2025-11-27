@@ -230,6 +230,14 @@ export const mockUserProfile: UserProfile = {
   role: 'client'
 };
 
+export const mockAnmolProfile: UserProfile = {
+  id: 'client-2',
+  fullName: 'Anmol',
+  email: 'anmol@example.com',
+  phoneNumber: '+919876543211',
+  role: 'client'
+};
+
 export const mockStaffProfile: UserProfile = {
   id: 'staff-1',
   fullName: 'Staff Member',
