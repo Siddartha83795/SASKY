@@ -28,6 +28,7 @@ export default function OrdersPage() {
   const sortedOrders = useMemo(() => {
     if (!clientOrders) return [];
     return [...clientOrders].sort((a, b) => {
+        // Handle both Timestamp and string formats for createdAt
         const timeA = (a.createdAt as any)?.toDate?.() || new Date(a.createdAt as string);
         const timeB = (b.createdAt as any)?.toDate?.() || new Date(b.createdAt as string);
         return timeB.getTime() - timeA.getTime();
