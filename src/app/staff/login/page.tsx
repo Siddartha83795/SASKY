@@ -13,7 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Mail, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 import { useFirebase } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 const DEMO_STAFF_EMAIL = 'staff@example.com';
 const DEMO_STAFF_PASSWORD = 'password';
@@ -28,7 +29,7 @@ export default function StaffLoginPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { auth } = useFirebase();
+    const { auth, firestore } = useFirebase();
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -53,7 +54,7 @@ export default function StaffLoginPage() {
              toast({
                 variant: 'destructive',
                 title: "Staff Login Failed",
-                description: error.message || "Invalid credentials.",
+                description: "Invalid credentials. Please try again.",
             });
         } finally {
             setIsSubmitting(false);
@@ -61,9 +62,60 @@ export default function StaffLoginPage() {
     };
     
     const useDemo = async () => {
-        form.setValue('email', DEMO_STAFF_EMAIL);
-        form.setValue('password', DEMO_STAFF_PASSWORD);
-        await handleLogin({ email: DEMO_STAFF_EMAIL, password: DEMO_STAFF_PASSWORD });
+        if (!auth || !firestore) {
+            toast({ variant: 'destructive', title: 'Firebase not initialized.'});
+            return;
+        }
+        setIsSubmitting(true);
+        
+        try {
+            // First, try to sign in, assuming the user exists
+            await signInWithEmailAndPassword(auth, DEMO_STAFF_EMAIL, DEMO_STAFF_PASSWORD);
+            toast({ title: "Staff Login Successful" });
+            router.push('/outlets');
+
+        } catch (error: any) {
+            // If login fails because the user is not found, create the user
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, DEMO_STAFF_EMAIL, DEMO_STAFF_PASSWORD);
+                    const user = userCredential.user;
+
+                    // Create the staff user profile in Firestore
+                    const userProfile = {
+                        id: user.uid,
+                        fullName: 'Demo Staff',
+                        email: DEMO_STAFF_EMAIL,
+                        phoneNumber: '+910000000000',
+                        role: 'staff'
+                    };
+                    await setDoc(doc(firestore, 'users', user.uid), userProfile);
+                    
+                    toast({ title: "Demo account created. Logging in..." });
+                    
+                    // Now log in with the newly created account
+                    await signInWithEmailAndPassword(auth, DEMO_STAFF_EMAIL, DEMO_STAFF_PASSWORD);
+                    toast({ title: "Staff Login Successful" });
+                    router.push('/outlets');
+
+                } catch (creationError: any) {
+                     toast({
+                        variant: 'destructive',
+                        title: "Demo Login Failed",
+                        description: "Could not create or log into the demo account.",
+                    });
+                }
+            } else {
+                // For other login errors
+                 toast({
+                    variant: 'destructive',
+                    title: "Staff Login Failed",
+                    description: error.message || "An unexpected error occurred.",
+                });
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
   return (
