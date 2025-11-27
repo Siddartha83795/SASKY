@@ -12,7 +12,9 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Mail, KeyRound } from 'lucide-react';
 import Link from 'next/link';
-import { mockUserProfile, mockStaffProfile, mockAnmolProfile } from '@/lib/data';
+import { useAuth, useFirebase } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -24,6 +26,7 @@ export default function LoginPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { auth, firestore } = useFirebase();
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -34,46 +37,39 @@ export default function LoginPage() {
         },
     });
 
-    const onSubmit: SubmitHandler<LoginFormValues> = (data) => {
+    const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
+        if (!auth || !firestore) {
+            toast({ variant: 'destructive', title: 'Firebase not initialized.'});
+            return;
+        }
+
         setIsSubmitting(true);
-        // Simulate an API call
-        setTimeout(() => {
-            if (data.email === mockUserProfile.email && data.password === "password123") {
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userRole', 'client');
-                localStorage.setItem('username', mockUserProfile.fullName);
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+            const user = userCredential.user;
+
+            const userDocRef = doc(firestore, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
                 toast({
                     title: "Login Successful",
-                    description: `Welcome back, ${mockUserProfile.fullName}!`,
+                    description: `Welcome back, ${userData.fullName}!`,
                 });
-                router.push('/outlets');
-            } else if (data.email === mockStaffProfile.email && data.password === "staffpass") {
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userRole', 'staff');
-                localStorage.setItem('username', mockStaffProfile.fullName);
-                toast({
-                    title: "Staff Login Successful",
-                    description: `Welcome, ${mockStaffProfile.fullName}!`,
-                });
-                router.push('/outlets');
-            } else if (data.email === mockAnmolProfile.email && data.password === "password123") {
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userRole', 'client');
-                localStorage.setItem('username', mockAnmolProfile.fullName);
-                toast({
-                    title: "Login Successful",
-                    description: `Welcome back, ${mockAnmolProfile.fullName}!`,
-                });
-                router.push('/outlets');
+                // The header will now handle role-based navigation and display name
+                 router.push('/outlets');
             } else {
-                toast({
-                    variant: 'destructive',
-                    title: "Login Failed",
-                    description: "Invalid email or password.",
-                });
+                 throw new Error("User profile not found.");
             }
+        } catch (error: any) {
+             toast({
+                variant: 'destructive',
+                title: "Login Failed",
+                description: error.message || "Invalid email or password.",
+            });
             setIsSubmitting(false);
-        }, 1500);
+        }
     };
 
   return (

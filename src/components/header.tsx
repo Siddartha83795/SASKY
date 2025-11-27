@@ -16,6 +16,9 @@ import { useCart } from '@/context/cart-context';
 import { ThemeToggle } from './theme-toggle';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAuth, useDoc, useFirebase, useUser, useMemoFirebase } from '@/firebase';
+import type { UserProfile } from '@/lib/types';
+import { doc } from 'firebase/firestore';
 
 const navLinks = [
   { href: '/outlets', label: 'Outlets' },
@@ -24,33 +27,29 @@ const navLinks = [
 
 export default function Header() {
   const { itemCount } = useCart();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
-  const pathname = usePathname();
   const router = useRouter();
+  const { auth, firestore } = useFirebase();
+  const { user: authUser, isUserLoading } = useUser();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    // Check login status from localStorage on mount
-    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
-    const storedRole = localStorage.getItem('userRole');
-    const storedUsername = localStorage.getItem('username');
-    setIsLoggedIn(loggedInStatus);
-    setUserRole(storedRole);
-    setUsername(storedUsername);
-  }, [pathname]); // Re-check on path change
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !authUser) return null;
+    return doc(firestore, 'users', authUser.uid);
+  }, [firestore, authUser]);
 
-  const handleLogout = () => {
-    // Clear login status from localStorage
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('username');
-    setIsLoggedIn(false);
-    setUserRole(null);
-    setUsername(null);
+  const { data: userProfile } = useDoc<UserProfile>(userProfileRef);
+
+  const handleLogout = async () => {
+    if (auth) {
+      await auth.signOut();
+    }
     router.push('/auth/login');
   };
   
+  const isLoggedIn = !!authUser;
+  const userRole = userProfile?.role;
+  const username = userProfile?.fullName;
+
   const showNavLinks = isLoggedIn && userRole === 'client' && !pathname.startsWith('/staff') && pathname !== '/';
 
   return (
@@ -91,7 +90,9 @@ export default function Header() {
             </Button>
            )}
 
-          {isLoggedIn ? (
+          {isUserLoading ? (
+            <div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
+          ) : isLoggedIn ? (
              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost">

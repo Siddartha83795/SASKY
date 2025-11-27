@@ -12,6 +12,9 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Mail, KeyRound, User, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth, useFirebase, setDocumentNonBlocking } from '@/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc } from 'firebase/firestore';
 
 const signUpSchema = z.object({
   fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -26,6 +29,7 @@ export default function SignUpPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { auth, firestore } = useFirebase();
 
     const form = useForm<SignUpFormValues>({
         resolver: zodResolver(signUpSchema),
@@ -33,23 +37,53 @@ export default function SignUpPage() {
         defaultValues: {
             fullName: '',
             email: '',
-            phoneNumber: '',
+            phoneNumber: '+91',
             password: '',
         },
     });
 
-    const onSubmit: SubmitHandler<SignUpFormValues> = (data) => {
+    const onSubmit: SubmitHandler<SignUpFormValues> = async (data) => {
+        if (!auth || !firestore) {
+            toast({ variant: 'destructive', title: 'Firebase not initialized.'});
+            return;
+        }
+
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
-            console.log("New user registered:", data);
+        try {
+            // Create user in Firebase Authentication
+            const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+            const user = userCredential.user;
+
+            // Create user profile in Firestore
+            const userProfile = {
+                id: user.uid,
+                fullName: data.fullName,
+                email: data.email,
+                phoneNumber: data.phoneNumber,
+                role: 'client' // All sign-ups are clients
+            };
+
+            const userDocRef = doc(firestore, 'users', user.uid);
+            
+            // Use non-blocking write for better UX
+            setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+            
             toast({
                 title: "Registration Successful",
                 description: "Your account has been created. Please log in.",
             });
-            setIsSubmitting(false);
+            
             router.push('/auth/login');
-        }, 1500);
+
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: "Registration Failed",
+                description: error.message || 'An unexpected error occurred.',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
   return (
