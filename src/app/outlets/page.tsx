@@ -13,19 +13,7 @@ export default function OutletsPage() {
   useEffect(() => {
     // Simulate fetching data
     setOutlets(mockOutlets);
-    const handlePopState = () => {
-      // Clear login status and redirect
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('userRole');
-      router.push('/auth/login');
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [router]);
+  }, []);
 
   return (
     <div className="container py-12">

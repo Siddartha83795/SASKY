@@ -14,10 +14,14 @@ export default function OutletCard({ outlet }: OutletCardProps) {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    // This will only run on the client side
     setUserRole(localStorage.getItem('userRole'));
   }, []);
 
-  const href = userRole === 'staff' ? `/staff/dashboard/${outlet.id}` : `/menu/${outlet.id}`;
+  // Determine the correct href based on the user's role
+  const href = userRole === 'staff' 
+    ? `/staff/dashboard/${outlet.id}` 
+    : `/menu/${outlet.id}`;
 
   return (
     <Link href={href} className="group block">
