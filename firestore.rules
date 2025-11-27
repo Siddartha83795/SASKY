@@ -98,11 +98,11 @@ service cloud.firestore {
       allow create: if isValidOrder();
 
       // Users can read their own orders. Staff can read all orders.
-      // For a client's query (list), this rule is checked on each document returned by the query.
+      // This rule is checked on each document returned by a client's filtered query.
       allow read: if isOwner(resource.data.client.id) || isStaff();
       
-      // Staff can list all orders. Clients cannot perform a general list without a filter.
-      // The client-side query MUST include `where('client.id', '==', auth.uid)`.
+      // Only staff can list all orders. Clients CANNOT list all orders.
+      // Their queries must be filtered, which then relies on the 'read' rule above.
       allow list: if isStaff();
 
       // Only staff can update order status.
