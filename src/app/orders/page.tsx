@@ -19,7 +19,8 @@ export default function OrdersPage() {
     if (!firestore || !authUser) return null;
     return query(
         collection(firestore, 'orders'),
-        where('client.id', '==', authUser.uid)
+        where('client.id', '==', authUser.uid),
+        orderBy('createdAt', 'desc')
     );
   }, [firestore, authUser]);
 
@@ -27,8 +28,8 @@ export default function OrdersPage() {
 
   const sortedOrders = useMemo(() => {
     if (!clientOrders) return [];
+    // The query now handles sorting, but we can keep this for safety/consistency if needed.
     return [...clientOrders].sort((a, b) => {
-        // Handle both Timestamp and string formats for createdAt
         const timeA = (a.createdAt as any)?.toDate?.() || new Date(a.createdAt as string);
         const timeB = (b.createdAt as any)?.toDate?.() || new Date(b.createdAt as string);
         return timeB.getTime() - timeA.getTime();
