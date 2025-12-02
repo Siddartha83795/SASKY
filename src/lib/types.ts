@@ -57,4 +57,7 @@ export type UserProfile = {
   email: string;
   phoneNumber: string;
   role: 'client' | 'staff';
+  name?: string;
+  phone?: string;
+  address?: string;
 };

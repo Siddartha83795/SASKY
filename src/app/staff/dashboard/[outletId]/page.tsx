@@ -6,7 +6,7 @@ import OrderCard from '@/components/order-card';
 import type { Order, Outlet, OrderStatus } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCollection, useDoc, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection, doc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, query, where, orderBy, Timestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 
@@ -20,6 +20,8 @@ const columns: StatusColumn[] = [
     { title: "In Preparation", status: ['preparing'] },
     { title: "Ready for Pickup", status: ['ready'] }
 ];
+
+type OrderWithDate = Omit<Order, 'createdAt'> & { createdAt: Date };
 
 export default function StaffOutletDashboardPage() {
   const { outletId } = useParams<{ outletId: string }>();
@@ -40,6 +42,15 @@ export default function StaffOutletDashboardPage() {
     );
   }, [firestore, outletId]);
   const { data: outletOrders, isLoading: areOrdersLoading } = useCollection<Order>(ordersQuery);
+
+  const ordersWithDates: OrderWithDate[] = useMemo(() => {
+    if (!outletOrders) return [];
+    return outletOrders.map(o => ({
+      ...o,
+      createdAt: (o.createdAt as Timestamp)?.toDate ? (o.createdAt as Timestamp).toDate() : new Date(o.createdAt as string),
+    }));
+  }, [outletOrders]);
+
 
   if (!isOutletLoading && !outlet) {
     notFound();
@@ -91,7 +102,7 @@ export default function StaffOutletDashboardPage() {
             {areOrdersLoading ? renderColumnSkeletons() : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
                     {columns.map(col => {
-                        const filteredOrders = outletOrders?.filter(o => col.status.includes(o.status)) || [];
+                        const filteredOrders = ordersWithDates?.filter(o => col.status.includes(o.status)) || [];
                         return (
                             <div key={col.title} className="bg-card rounded-lg flex flex-col h-full">
                                 <h2 className="text-lg font-semibold p-4 border-b font-headline">{col.title} ({filteredOrders.length})</h2>

@@ -11,6 +11,8 @@ import { collection, query, where, orderBy, Timestamp } from 'firebase/firestore
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 
+type OrderWithDate = Omit<Order, 'createdAt'> & { createdAt: Date };
+
 export default function OrdersPage() {
   const { firestore } = useFirebase();
   const { user: authUser, isUserLoading } = useUser();
@@ -26,10 +28,8 @@ export default function OrdersPage() {
 
   const { data: clientOrders, isLoading: areOrdersLoading } = useCollection<Order>(ordersQuery);
 
-  const sortedOrders = useMemo(() => {
+  const sortedOrders: OrderWithDate[] = useMemo(() => {
     if (!clientOrders) return [];
-    // The data is already sorted by the Firestore query.
-    // We just need to handle the Timestamp to Date conversion if it hasn't happened.
     return clientOrders.map(o => ({
       ...o,
       createdAt: (o.createdAt as Timestamp)?.toDate ? (o.createdAt as Timestamp).toDate() : new Date(o.createdAt as string),

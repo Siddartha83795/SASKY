@@ -19,8 +19,10 @@ import { doc, Timestamp } from 'firebase/firestore';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Skeleton } from './ui/skeleton';
 
+type OrderWithDate = Omit<Order, 'createdAt'> & { createdAt: Date };
+
 type OrderCardProps = {
-  order: Order;
+  order: OrderWithDate;
   isStaffView?: boolean;
 };
 
@@ -57,7 +59,7 @@ export default function OrderCard({ order, isStaffView = false }: OrderCardProps
   const { data: outlet, isLoading: isOutletLoading } = useDoc(outletRef);
   
 
-  const createdAt = (order.createdAt as unknown as Timestamp)?.toDate() || new Date();
+  const createdAt = order.createdAt; // Already a Date object
   const timeAgo = Math.round((new Date().getTime() - createdAt.getTime()) / (1000 * 60));
 
   const handleStatusUpdate = (newStatus: OrderStatus) => {
