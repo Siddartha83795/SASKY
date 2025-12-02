@@ -26,12 +26,10 @@ service cloud.firestore {
     /**
      * Checks if the currently authenticated user has the 'staff' role
      * by reading the role from their user profile document.
+     * This is a secure way to check roles stored in Firestore documents.
      */
     function isStaff() {
-      // Check for the existence of the user document and that their role is 'staff'
-      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
-             && userDoc.data.role == 'staff';
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
     }
     
     /**
@@ -39,6 +37,7 @@ service cloud.firestore {
      */
     function isValidOrder() {
       let incomingData = request.resource.data;
+      // Ensures the person creating the order is the one listed as the client
       return isSignedIn() &&
              isOwner(incomingData.client.id) &&
              incomingData.outletId is string &&
@@ -93,11 +92,10 @@ service cloud.firestore {
       allow create: if isValidOrder();
       
       // A user can read their own order. Staff can read any order.
-      // This rule allows the client's filtered query to succeed securely.
+      // This is the key rule that allows a client's filtered query to succeed securely.
       allow read: if isOwner(resource.data.client.id) || isStaff();
       
-      // This is the key change: Only staff can list the entire collection.
-      // Client queries are secured by the 'read' rule above because they MUST be filtered.
+      // Staff can list all orders. Clients cannot list all orders.
       allow list: if isStaff();
 
       // Staff can update any order. Clients can only cancel their own pending order.
