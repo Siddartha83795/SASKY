@@ -28,12 +28,14 @@ service cloud.firestore {
      * by reading the role from their user profile document.
      */
     function isStaff() {
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
+      // Check for the existence of the user document and that their role is 'staff'
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+             && userDoc.data.role == 'staff';
     }
     
     /**
-     * Validates that the incoming data for an order has the correct structure and ownership.
+     * Validates that the incoming data for a new order has the correct structure and ownership.
      */
     function isValidOrder() {
       let incomingData = request.resource.data;
@@ -55,8 +57,11 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
+      // A user can create their own profile.
       allow create: if isOwner(userId);
+      // A user can read/update their own profile. Staff can read any profile.
       allow read, update: if isOwner(userId) || isStaff();
+      // Only staff can list all users.
       allow list: if isStaff();
       allow delete: if false; 
     }
@@ -84,18 +89,17 @@ service cloud.firestore {
      * @path /orders/{orderId}
      */
     match /orders/{orderId} {
+      // A signed-in user can create a valid order for themselves.
       allow create: if isValidOrder();
       
-      // Users can read their own orders. Staff can read all orders.
-      // This is the key rule. When a client queries with where('client.id', '==', uid),
-      // Firestore checks this `read` permission on each document returned.
+      // A user can read their own order. Staff can read any order.
       allow read: if isOwner(resource.data.client.id) || isStaff();
       
-      // Only staff are allowed to list the entire collection without filters.
-      // Client queries MUST be filtered, which then relies on the 'read' rule above.
+      // This is the key change: Only staff can list the entire collection.
+      // Client queries are secured by the 'read' rule above because they MUST be filtered.
       allow list: if isStaff();
 
-      // Staff can update any order. Clients can only update their own order to cancel it if it's pending.
+      // Staff can update any order. Clients can only cancel their own pending order.
       allow update: if isStaff() || (isOwner(resource.data.client.id) && request.resource.data.status == 'cancelled' && resource.data.status == 'pending');
       
       // No one can delete orders for now.
@@ -107,6 +111,7 @@ service cloud.firestore {
      * @path /counters/{outletId}
      */
      match /counters/{outletId} {
+        // Only staff should be able to manage counters.
         allow read, write: if isStaff();
      }
   }
