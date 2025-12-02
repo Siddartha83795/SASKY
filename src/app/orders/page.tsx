@@ -63,7 +63,7 @@ export default function OrdersPage() {
     return (
        <div className="container py-12 text-center">
         <h1 className="text-3xl font-bold font-headline">You have no orders yet</h1>
-        <p className="mt-4 text-muted-foreground">Looks like you haven't placed an order.</p>
+        <p className="mt-4 text-muted-foreground">Looks like you haven&apos;t placed an order.</p>
         <Button asChild className="mt-8">
           <Link href="/outlets">
             Order Now

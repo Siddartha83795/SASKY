@@ -18,7 +18,7 @@ function OrderConfirmationContent() {
         <CardHeader className="items-center">
           <CheckCircle2 className="h-16 w-16 text-green-500" />
           <CardTitle className="mt-4 text-3xl font-bold font-headline">Order Placed Successfully!</CardTitle>
-          <CardDescription>Thank you for your order. We're preparing it now.</CardDescription>
+          <CardDescription>Thank you for your order. We&apos;re preparing it now.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="rounded-lg border bg-muted p-4">

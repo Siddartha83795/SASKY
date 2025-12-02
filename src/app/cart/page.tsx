@@ -136,7 +136,7 @@ export default function CartPage() {
     return (
       <div className="container py-12 text-center">
         <h1 className="text-3xl font-bold font-headline">Your Cart is Empty</h1>
-        <p className="mt-4 text-muted-foreground">Looks like you haven't added anything to your cart yet.</p>
+        <p className="mt-4 text-muted-foreground">Looks like you haven&apos;t added anything to your cart yet.</p>
         <Button asChild className="mt-8">
           <Link href="/outlets">
             <ArrowLeft className="mr-2 h-4 w-4" />

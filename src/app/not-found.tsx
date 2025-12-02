@@ -10,7 +10,7 @@ export default function NotFound() {
         404 - Page Not Found
       </h1>
       <p className="mt-4 text-lg text-muted-foreground">
-        Oops! The page you're looking for doesn't exist.
+        Oops! The page you&apos;re looking for doesn&apos;t exist.
       </p>
       <p className="mt-2 text-muted-foreground">
         Maybe you took a wrong turn at the buffet.
