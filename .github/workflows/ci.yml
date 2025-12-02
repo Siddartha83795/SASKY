@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy to Firebase App Hosting
-        uses: firebase/app-hosting-action@v1
+        uses: FirebaseExtended/apphosting-actions-setup@v0
         with:
           # This is the service account key for your Firebase project.
           # You will need to create a service account in the Google Cloud Console,
