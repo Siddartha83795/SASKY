@@ -56,4 +56,3 @@ jobs:
           # This is your Firebase Project ID.
           # Add it as a secret named FIREBASE_PROJECT_ID in your GitHub repository settings.
           project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
-
