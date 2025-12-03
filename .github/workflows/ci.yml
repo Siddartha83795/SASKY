@@ -14,10 +14,12 @@ jobs:
         node-version: [18.x]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+
       - run: npm ci
       - run: npm run lint
       - run: npm run build
@@ -47,7 +49,6 @@ jobs:
         env:
           PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
         run: |
-          # if firebase.json lives in a subfolder, cd there or update working-directory
           if [ -f firebase.json ]; then
             firebase deploy --only hosting --project "$PROJECT_ID"
           elif [ -f client/firebase.json ]; then
