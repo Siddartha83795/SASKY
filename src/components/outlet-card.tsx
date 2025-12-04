@@ -3,20 +3,14 @@ import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Outlet } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useEffect, useState } from 'react';
 
 type OutletCardProps = {
   outlet: Outlet;
+  userRole?: 'client' | 'staff' | null;
 };
 
-export default function OutletCard({ outlet }: OutletCardProps) {
+export default function OutletCard({ outlet, userRole }: OutletCardProps) {
   const image = PlaceHolderImages.find((img) => img.id === outlet.imageId);
-  const [userRole, setUserRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    // This will only run on the client side after mount
-    setUserRole(localStorage.getItem('userRole'));
-  }, []);
 
   // Determine the correct href based on the user's role
   const href = userRole === 'staff' 
@@ -32,7 +26,7 @@ export default function OutletCard({ outlet }: OutletCardProps) {
               src={image.imageUrl}
               alt={image.description}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-in-out group-hover:scale-105"
               data-ai-hint={image.imageHint}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
