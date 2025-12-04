@@ -1,16 +1,25 @@
+
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Outlet } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useEffect, useState } from 'react';
 
 type OutletCardProps = {
   outlet: Outlet;
-  userRole?: 'client' | 'staff' | null;
 };
 
-export default function OutletCard({ outlet, userRole }: OutletCardProps) {
+export default function OutletCard({ outlet }: OutletCardProps) {
   const image = PlaceHolderImages.find((img) => img.id === outlet.imageId);
+  const [userRole, setUserRole] = useState<'client' | 'staff' | null>(null);
+
+   useEffect(() => {
+    // This is a client-side check. It will run after the component mounts.
+    const role = localStorage.getItem('userRole') as 'client' | 'staff' | null;
+    setUserRole(role);
+  }, []);
 
   // Determine the correct href based on the user's role
   const href = userRole === 'staff' 
@@ -45,3 +54,4 @@ export default function OutletCard({ outlet, userRole }: OutletCardProps) {
     </Link>
   );
 }
+
