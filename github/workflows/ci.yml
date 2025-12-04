@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Required for authentication
+      id-token: write
     
     steps:
       - name: Checkout repository
