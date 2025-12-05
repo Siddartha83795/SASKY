@@ -1,26 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 import OutletCard from '@/components/outlet-card';
-import { outlets as mockOutlets } from '@/lib/data';
-import type { Outlet } from '@/lib/types';
+import type { Outlet, UserProfile } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCollection, useDoc, useFirebase, useUser, useMemoFirebase } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 
 export default function OutletsPage() {
-  const [outlets, setOutlets] = useState<Outlet[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  const { firestore } = useFirebase();
+  const { user: authUser } = useUser();
+  
+  const outletsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'outlets');
+  }, [firestore]);
 
-  useEffect(() => {
-    // Simulate fetching data
-    const timer = setTimeout(() => {
-      setOutlets(mockOutlets);
-      setIsLoading(false);
-    }, 1000);
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !authUser) return null;
+    return doc(firestore, 'users', authUser.uid);
+  }, [firestore, authUser]);
 
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: outlets, isLoading: areOutletsLoading } = useCollection<Outlet>(outletsQuery);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userProfileRef);
+
+  const isLoading = areOutletsLoading || isProfileLoading;
 
   const renderSkeletons = () => (
     [...Array(3)].map((_, i) => (
@@ -44,8 +48,8 @@ export default function OutletsPage() {
       </div>
       <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {isLoading ? renderSkeletons() : (
-          outlets.map((outlet) => (
-            <OutletCard key={outlet.id} outlet={outlet} />
+          outlets?.map((outlet) => (
+            <OutletCard key={outlet.id} outlet={outlet} userRole={userProfile?.role || 'client'} />
           ))
         )}
       </div>
